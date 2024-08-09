@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+godot_dir="cof-godot"
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 pushd "$dir" > /dev/null
 
@@ -41,14 +41,14 @@ if [ $# -eq 4 ]; then
 fi
 
 pushd ..
-rm -rf godot
+rm -rf $godot_dir
 git clone --depth 1 $repo -b $branch
 if [ $dev = "true" ]; then
-	cp -r .idea godot
-	cp build/custom.py godot
+	cp -r .idea $godot_dir
+	cp build/custom.py $godot_dir
 	if [ "$mono" = "true" ]; then
-		echo "" >> godot/custom.py
-    	echo "module_mono_enabled=\"yes\"" >> godot/custom.py
+		echo "" >> $godot_dir/custom.py
+    	echo "module_mono_enabled=\"yes\"" >> $godot_dir/custom.py
 	fi
 	cp ../formatters/.clang-format .
 	rm -rf example/.import
