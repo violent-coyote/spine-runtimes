@@ -1,10 +1,11 @@
 #!/bin/bash
 set -e
 
+godot_dir="cof-godot"
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 pushd "$dir" > /dev/null
 
-if [ ! -d ../godot ]; then
+if [ ! -d ../$godot_dir ]; then
 	echo "No Godot clone found. Run ./setup.sh <Godot branch or tag> <dev> first."
 	exit 1
 fi
@@ -27,7 +28,7 @@ if [ $# -gt 0 ]; then
 	fi
 fi
 
-if [ -f "../godot/custom.py" ]; then
+if [ -f "../${godot_dir}/custom.py" ]; then
 	dev="true"
 	echo "DEV build"
 fi
@@ -73,7 +74,7 @@ fi
 
 echo "CPUS: $cpus"
 
-pushd ../godot
+pushd ../$godot_dir
 if [ "$os" == "macos" ] && [ $dev == "false" ]; then
 	scons $target $mono_module arch=x86_64 compiledb=yes custom_modules="../spine_godot" opengl3=yes --jobs=$cpus
 	scons $target $mono_module arch=arm64 compiledb=yes custom_modules="../spine_godot" opengl3=yes --jobs=$cpus
