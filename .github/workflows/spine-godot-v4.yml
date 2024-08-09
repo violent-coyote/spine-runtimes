@@ -55,7 +55,7 @@ jobs:
       - name: Build Godot artifact
         shell: bash
         run: |
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO https://github.com/violent-coyote/cof-godot.git
           ./spine-godot/build/build-v4.sh $GODOT_MONO
 
       - name: Upload artifacts
