@@ -15,6 +15,10 @@ on:
         required: true
         type: boolean
         default: false
+      godot_repo:
+        required: true
+        type: string
+        default: "https://github.com/godotengine/godot.git"
   workflow_dispatch:
     inputs:
       godot_tag:
@@ -29,6 +33,10 @@ on:
         required: true
         type: boolean
         default: false
+      godot_repo:
+        required: true
+        type: string
+        default: "https://github.com/godotengine/godot.git"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -39,6 +47,7 @@ env:
   GODOT_VERSION: ${{ inputs.godot_version }}
   GODOT_MONO: ${{ inputs.godot_mono }}
   GODOT_MONO_UPLOAD_SUFFIX: ${{ inputs.godot_mono == true && '-mono' || '' }}
+  GODOT_REPO: ${{ inputs.godot_repo }}
 
 jobs:
 
@@ -55,7 +64,7 @@ jobs:
       - name: Build Godot artifact
         shell: bash
         run: |
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO https://github.com/violent-coyote/cof-godot.git
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-v4.sh $GODOT_MONO
 
       - name: Upload artifacts
@@ -79,7 +88,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO https://github.com/violent-coyote/cof-godot.git
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-v4.sh $GODOT_MONO
 
       - name: Upload artifacts
@@ -102,7 +111,7 @@ jobs:
         shell: bash
         run: |
           ./spine-godot/build/install-macos-vulkan-sdk.sh
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO https://github.com/violent-coyote/cof-godot.git
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-v4.sh $GODOT_MONO
           pushd spine-godot/godot/bin
           zip -r godot-editor-macos.zip Godot.app
@@ -151,7 +160,7 @@ jobs:
       - name: Build Godot artifact
         run: |
           ./spine-godot/build/install-macos-vulkan-sdk.sh
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO https://github.com/violent-coyote/cof-godot.git
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-templates-v4.sh macos $GODOT_MONO
 
       - name: Upload artifacts
@@ -174,7 +183,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-templates-v4.sh linux $GODOT_MONO
 
       - name: Upload artifacts debug
@@ -202,7 +211,7 @@ jobs:
       - name: Build Godot artifact
         shell: bash
         run: |
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO https://github.com/violent-coyote/cof-godot.git
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-templates-v4.sh windows $GODOT_MONO
 
       - name: Upload artifacts debug
@@ -287,7 +296,7 @@ jobs:
 
       - name: Build Godot artifact
         run: |
-          ./spine-godot/build/setup.sh $GODOT_TAG false https://github.com/violent-coyote/cof-godot.git
+          ./spine-godot/build/setup.sh $GODOT_TAG false false $GODOT_REPO
           ./spine-godot/build/build-templates-v4.sh web
 
       - name: Upload artifacts debug

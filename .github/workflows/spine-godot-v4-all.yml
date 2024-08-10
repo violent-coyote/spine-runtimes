@@ -18,11 +18,13 @@ jobs:
             # {"tag": "4.1.4-stable", "version": "4.1.4.stable", "mono": true},
             # {"tag": "4.2.2-stable", "version": "4.2.2.stable", "mono": false},
             # {"tag": "4.2.2-stable", "version": "4.2.2.stable", "mono": true},
-            {"tag": "4.3-rc3", "version": "4.3.rc3", "mono": false},
+            {"tag": "4.3-rc3", "version": "4.3.rc3", "mono": false, "repo": "https://github.com/violent-coyote/cof-godot.git"},
           ]
     uses: ./.github/workflows/spine-godot-v4.yml
     with:
       godot_tag: ${{ matrix.version.tag }}
       godot_version: ${{ matrix.version.version }}
       godot_mono: ${{ matrix.version.mono }}
+      godot_repo: ${{ matrix.version.repo }}
+
     secrets: inherit
