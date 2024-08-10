@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-godot_dir="cof-godot"
+godot_dir="godot"
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 pushd "$dir" > /dev/null
 
@@ -43,6 +43,8 @@ fi
 pushd ..
 rm -rf $godot_dir
 git clone --depth 1 $repo -b $branch
+# Rename the cloned directory to "godot"
+mv $(basename $repo .git) $godot_dir
 if [ $dev = "true" ]; then
 	cp -r .idea $godot_dir
 	cp build/custom.py $godot_dir
