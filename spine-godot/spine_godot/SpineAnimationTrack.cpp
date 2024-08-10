@@ -183,13 +183,13 @@ void SpineAnimationTrack::setup_animation_player() {
 		List<StringName> animation_libraries;
 		animation_player->get_animation_library_list(&animation_libraries);
 		for (int i = 0; i < animation_libraries.size(); i++) {
-			animation_player->remove_animation_library(animation_libraries[i]);
+			animation_player->remove_animation_library(animation_libraries.get(i));
 		}
 #else
 		List<StringName> animation_names;
 		animation_player->get_animation_list(&animation_names);
 		for (int i = 0; i < animation_names.size(); i++) {
-			animation_player->remove_animation(animation_names[i]);
+			animation_player->remove_animation(animation_names.get(i));
 		}
 #endif
 	}
