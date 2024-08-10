@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-godot_dir="cof-godot"
+godot_dir="godot"
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 pushd "$dir" > /dev/null
 
