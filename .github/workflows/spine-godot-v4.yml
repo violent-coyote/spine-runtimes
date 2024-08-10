@@ -161,6 +161,7 @@ jobs:
       - name: Build Godot artifact
         run: |
           ./spine-godot/build/install-macos-vulkan-sdk.sh
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-templates-v4.sh macos $GODOT_MONO
 
       - name: Upload artifacts
@@ -190,6 +191,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-templates-v4.sh linux $GODOT_MONO
 
       - name: Upload artifacts debug
@@ -224,6 +226,7 @@ jobs:
       - name: Build Godot artifact
         shell: bash
         run: |
+          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-templates-v4.sh windows $GODOT_MONO
 
       - name: Upload artifacts debug
@@ -268,6 +271,7 @@ jobs:
 
       - name: Build Godot artifact
         run: |
+          ./spine-godot/build/setup.sh $GODOT_TAG false false $GODOT_REPO
           ./spine-godot/build/build-templates-v4.sh web
 
       - name: Upload artifacts debug
