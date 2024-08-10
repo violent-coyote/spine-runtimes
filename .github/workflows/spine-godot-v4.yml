@@ -61,6 +61,12 @@ jobs:
       - name: Setup python and scons
         uses: ./.github/actions/setup-godot-deps-4
 
+      - name: Cache Godot build
+        uses: actions/cache@v3
+        with:
+          path: spine-godot/godot
+          key: ${{ runner.os }}-godot-${{ env.GODOT_TAG }}-${{ env.GODOT_MONO }}-${{ hashFiles('spine-godot/build/**') }}
+
       - name: Build Godot artifact
         shell: bash
         run: |
@@ -82,6 +88,12 @@ jobs:
 
       - name: Setup python and scons
         uses: ./.github/actions/setup-godot-deps-4
+
+      - name: Cache Godot build
+        uses: actions/cache@v3
+        with:
+          path: spine-godot/godot
+          key: ${{ runner.os }}-godot-${{ env.GODOT_TAG }}-${{ env.GODOT_MONO }}-${{ hashFiles('spine-godot/build/**') }}
 
       - name: Build Godot artifact
         shell: bash
@@ -107,6 +119,12 @@ jobs:
       - name: Setup python and scons
         uses: ./.github/actions/setup-godot-deps-4
 
+      - name: Cache Godot build
+        uses: actions/cache@v3
+        with:
+          path: spine-godot/godot
+          key: ${{ runner.os }}-godot-${{ env.GODOT_TAG }}-${{ env.GODOT_MONO }}-${{ hashFiles('spine-godot/build/**') }}
+
       - name: Build Godot artifact
         shell: bash
         run: |
@@ -122,6 +140,147 @@ jobs:
         with:
           name: ${{ format('{0}-{1}{2}.zip', 'godot-editor-macos', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
           path: spine-godot/godot/bin/godot-editor-macos.zip
+
+  godot-template-macos:
+    runs-on: macos-latest
+    needs: godot-editor-macos
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup python and scons
+        uses: ./.github/actions/setup-godot-deps-4
+
+      - name: Restore Godot build cache
+        uses: actions/cache@v3
+        with:
+          path: spine-godot/godot
+          key: ${{ runner.os }}-godot-${{ env.GODOT_TAG }}-${{ env.GODOT_MONO }}-${{ hashFiles('spine-godot/build/**') }}
+
+      - name: Build Godot artifact
+        run: |
+          ./spine-godot/build/install-macos-vulkan-sdk.sh
+          ./spine-godot/build/build-templates-v4.sh macos $GODOT_MONO
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-macos', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
+          path: spine-godot/godot/bin/macos.zip
+
+  godot-template-linux:
+    runs-on: ubuntu-20.04
+    needs: godot-editor-linux
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup python and scons
+        uses: ./.github/actions/setup-godot-deps-4
+
+      - name: Restore Godot build cache
+        uses: actions/cache@v3
+        with:
+          path: spine-godot/godot
+          key: ${{ runner.os }}-godot-${{ env.GODOT_TAG }}-${{ env.GODOT_MONO }}-${{ hashFiles('spine-godot/build/**') }}
+
+      - name: Build Godot artifact
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev
+          ./spine-godot/build/build-templates-v4.sh linux $GODOT_MONO
+
+      - name: Upload artifacts debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-linux-debug', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
+          path: spine-godot/godot/bin/linux_debug.x86_64
+
+      - name: Upload artifacts release
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-linux-release', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
+          path: spine-godot/godot/bin/linux_release.x86_64
+
+  godot-template-windows:
+    runs-on: windows-latest
+    needs: godot-editor-windows
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup python and scons
+        uses: ./.github/actions/setup-godot-deps-4
+
+      - name: Restore Godot build cache
+        uses: actions/cache@v3
+        with:
+          path: spine-godot/godot
+          key: ${{ runner.os }}-godot-${{ env.GODOT_TAG }}-${{ env.GODOT_MONO }}-${{ hashFiles('spine-godot/build/**') }}
+
+      - name: Build Godot artifact
+        shell: bash
+        run: |
+          ./spine-godot/build/build-templates-v4.sh windows $GODOT_MONO
+
+      - name: Upload artifacts debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-windows-debug', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
+          path: spine-godot/godot/bin/windows_debug_x86_64.exe
+
+      - name: Upload artifacts release
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-windows-release', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
+          path: spine-godot/godot/bin/windows_release_x86_64.exe
+
+  godot-template-web:
+    runs-on: ubuntu-20.04
+    if: ${{ inputs.godot_mono == false }}
+    needs: godot-editor-linux
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Emscripten latest
+        uses: mymindstorm/setup-emsdk@v11
+        with:
+          version: ${{env.EM_VERSION}}
+
+      - name: Verify Emscripten setup
+        run: |
+          emcc -v
+
+      - name: Setup python and scons
+        uses: ./.github/actions/setup-godot-deps-4
+
+      - name: Restore Godot build cache
+        uses: actions/cache@v3
+        with:
+          path: spine-godot/godot
+          key: ${{ runner.os }}-godot-${{ env.GODOT_TAG }}-${{ env.GODOT_MONO }}-${{ hashFiles('spine-godot/build/**') }}
+
+      - name: Build Godot artifact
+        run: |
+          ./spine-godot/build/build-templates-v4.sh web
+
+      - name: Upload artifacts debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-web-debug', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
+          path: spine-godot/godot/bin/web_debug.zip
+
+      - name: Upload artifacts release
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-web-release', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
+          path: spine-godot/godot/bin/web_release.zip
 
   # godot-template-ios:
   #   runs-on: macos-latest
@@ -146,85 +305,6 @@ jobs:
   #       with:
   #         name: ${{ format('{0}-{1}{2}.zip', 'godot-template-ios', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
   #         path: spine-godot/godot/bin/ios.zip
-
-  godot-template-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Setup python and scons
-        uses: ./.github/actions/setup-godot-deps-4
-
-      - name: Build Godot artifact
-        run: |
-          ./spine-godot/build/install-macos-vulkan-sdk.sh
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
-          ./spine-godot/build/build-templates-v4.sh macos $GODOT_MONO
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-macos', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
-          path: spine-godot/godot/bin/macos.zip
-
-  godot-template-linux:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Setup python and scons
-        uses: ./.github/actions/setup-godot-deps-4
-
-      - name: Build Godot artifact
-        run: |
-          sudo apt-get update
-          sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
-          ./spine-godot/build/build-templates-v4.sh linux $GODOT_MONO
-
-      - name: Upload artifacts debug
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-linux-debug', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
-          path: spine-godot/godot/bin/linux_debug.x86_64
-
-      - name: Upload artifacts release
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-linux-release', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
-          path: spine-godot/godot/bin/linux_release.x86_64
-
-  godot-template-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Setup python and scons
-        uses: ./.github/actions/setup-godot-deps-4
-
-      - name: Build Godot artifact
-        shell: bash
-        run: |
-          ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
-          ./spine-godot/build/build-templates-v4.sh windows $GODOT_MONO
-
-      - name: Upload artifacts debug
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-windows-debug', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
-          path: spine-godot/godot/bin/windows_debug_x86_64.exe
-
-      - name: Upload artifacts release
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-windows-release', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
-          path: spine-godot/godot/bin/windows_release_x86_64.exe
 
   # godot-template-android:
   #   runs-on: ubuntu-20.04
@@ -272,44 +352,6 @@ jobs:
   #       with:
   #         name: ${{ format('{0}-{1}{2}.zip', 'godot-template-android-source', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
   #         path: spine-godot/godot/bin/android_source.zip
-
-  godot-template-web:
-    runs-on: ubuntu-20.04
-    if: ${{ inputs.godot_mono == false }}
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Set up Emscripten latest
-        uses: mymindstorm/setup-emsdk@v11
-        with:
-          version: ${{env.EM_VERSION}}
-
-      - name: Verify Emscripten setup
-        run: |
-          emcc -v
-
-      - name: Setup python and scons
-        uses: ./.github/actions/setup-godot-deps-4
-
-      - name: Build Godot artifact
-        run: |
-          ./spine-godot/build/setup.sh $GODOT_TAG false false $GODOT_REPO
-          ./spine-godot/build/build-templates-v4.sh web
-
-      - name: Upload artifacts debug
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-web-debug', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
-          path: spine-godot/godot/bin/web_debug.zip
-
-      - name: Upload artifacts release
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-web-release', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
-          path: spine-godot/godot/bin/web_release.zip
 
   # upload-to-s3:
   #   needs: [godot-editor-windows, godot-editor-linux, godot-editor-macos, godot-template-ios, godot-template-macos, godot-template-windows, godot-template-linux, godot-template-android, godot-template-web]
