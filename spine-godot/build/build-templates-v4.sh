@@ -137,8 +137,8 @@ elif [ "$platform" = "web" ]; then
 	# nothreads	
 	scons platform=web tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
 	scons platform=web tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
-	mv bin/godot.web.template_release.wasm32.zip bin/web_nothreads_release.zip
-	mv bin/godot.web.template_debug.wasm32.zip bin/web_nothreads_debug.zip
+	mv bin/godot.web.template_release.wasm32.nothreads.zip bin/web_nothreads_release.zip
+	mv bin/godot.web.template_debug.wasm32.nothreads.zip bin/web_nothreads_debug.zip
 
 	# dlink
 	scons platform=web dlink_enabled=yes tools=no target=template_release custom_modules="../spine_godot" --jobs=$cpus
@@ -149,8 +149,8 @@ elif [ "$platform" = "web" ]; then
 	# dlink nothreads
 	scons platform=web dlink_enabled=yes tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
 	scons platform=web dlink_enabled=yes tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
-	mv bin/godot.web.template_release.wasm32.dlink.zip bin/web_dlink_nothreads_release.zip
-	mv bin/godot.web.template_debug.wasm32.dlink.zip bin/web_dlink_nothreads_debug.zip
+	mv bin/godot.web.template_release.wasm32.dlink.nothreads.zip bin/web_dlink_nothreads_release.zip
+	mv bin/godot.web.template_debug.wasm32.dlink.nothreads.zip bin/web_dlink_nothreads_debug.zip
 	
 
 elif [ "$platform" = "android" ]; then
