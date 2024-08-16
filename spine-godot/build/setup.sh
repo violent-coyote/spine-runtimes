@@ -42,9 +42,7 @@ fi
 
 pushd ..
 rm -rf $godot_dir
-git clone --depth 1 $repo -b $branch
-# Rename the cloned directory to "godot"
-mv $(basename $repo .git) $godot_dir
+git clone --depth 1 $repo -b $branch $godot_dir
 if [ $dev = "true" ]; then
 	cp -r .idea $godot_dir
 	cp build/custom.py $godot_dir
