@@ -16,7 +16,7 @@ on:
         type: boolean
         default: false
       godot_repo:
-        required: true
+        required: false
         type: string
         default: "https://github.com/godotengine/godot.git"
   workflow_dispatch:
@@ -34,7 +34,7 @@ on:
         type: boolean
         default: false
       godot_repo:
-        required: true
+        required: false
         type: string
         default: "https://github.com/godotengine/godot.git"
 
