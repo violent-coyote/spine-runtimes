@@ -128,29 +128,56 @@ elif [ "$platform" = "ios" ]; then
 elif [ "$platform" = "web" ]; then
 	# --- WEB ---
 	# https://github.com/godotengine/godot-docs/blob/b54f912c77304eb96093ba59dee8c3c69af0e8be/contributing/development/compiling/compiling_for_web.rst
-	# generates webassembly_debug.zip, webassembly_release.zip
-	scons platform=web tools=no target=template_release custom_modules="../spine_godot" --jobs=$cpus
-	scons platform=web tools=no target=template_debug custom_modules="../spine_godot" --jobs=$cpus
+	# generates all possible web export variants: 
+	# web_debug.zip
+	# web_dlink_debug.zip
+	# web_dlink_nothreads_debug.zip
+	# web_dlink_nothreads_release.zip
+	# web_dlink_release.zip
+	# web_nothreads_debug.zip
+	# web_nothreads_release.zip
+	# web_release.zip
+
+	# `production=yes` is an alias for `use_static_cpp=yes debug_symbols=no lto=auto`
+	# use `production=yes` with `debug_symbols=yes` to retain other optimizations but keep debug symbols
+
+	# default (multithreaded)
+	scons platform=web production=yes tools=no target=template_release custom_modules="../spine_godot" --jobs=$cpus
+	scons platform=web production=yes debug_symbols=yes tools=no target=template_debug custom_modules="../spine_godot" --jobs=$cpus
 	mv bin/godot.web.template_release.wasm32.zip bin/web_release.zip
 	mv bin/godot.web.template_debug.wasm32.zip bin/web_debug.zip
 
-	# nothreads	
-	scons platform=web tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
-	scons platform=web tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
+	# nothreads	(firefox compatibility)
+	scons platform=web production=yes tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
+	scons platform=web production=yes debug_symbols=yes tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
 	mv bin/godot.web.template_release.wasm32.nothreads.zip bin/web_nothreads_release.zip
 	mv bin/godot.web.template_debug.wasm32.nothreads.zip bin/web_nothreads_debug.zip
 
-	# dlink
-	scons platform=web dlink_enabled=yes tools=no target=template_release custom_modules="../spine_godot" --jobs=$cpus
-	scons platform=web dlink_enabled=yes tools=no target=template_debug custom_modules="../spine_godot" --jobs=$cpus
+	# dlink (GDExtension support)
+	scons platform=web production=yes dlink_enabled=yes tools=no target=template_release custom_modules="../spine_godot" --jobs=$cpus
+	scons platform=web production=yes debug_symbols=yes dlink_enabled=yes tools=no target=template_debug custom_modules="../spine_godot" --jobs=$cpus
 	mv bin/godot.web.template_release.wasm32.dlink.zip bin/web_dlink_release.zip
 	mv bin/godot.web.template_debug.wasm32.dlink.zip bin/web_dlink_debug.zip
 
 	# dlink nothreads
-	scons platform=web dlink_enabled=yes tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
-	scons platform=web dlink_enabled=yes tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
-	mv bin/godot.web.template_release.wasm32.dlink.nothreads.zip bin/web_dlink_nothreads_release.zip
-	mv bin/godot.web.template_debug.wasm32.dlink.nothreads.zip bin/web_dlink_nothreads_debug.zip
+	scons platform=web production=yes dlink_enabled=yes tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
+	scons platform=web production=yes debug_symbols=yes dlink_enabled=yes tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
+	mv bin/godot.web.template_release.wasm32.nothreads.dlink.zip bin/web_dlink_nothreads_release.zip
+	mv bin/godot.web.template_debug.wasm32.nothreads.dlink.zip bin/web_dlink_nothreads_debug.zip
+
+	# package the binaries in one archive (`tpz`), includes version.txt
+	# default version = 4.3.stable, TODO: provide a version flag
+	echo "4.3.stable" > bin/version.txt
+
+	zip Godot_v4_export_templates_web.tpz bin/version.txt \
+	bin/web_debug.zip \
+	bin/web_dlink_debug.zip \
+	bin/web_dlink_nothreads_debug.zip \
+	bin/web_dlink_nothreads_release.zip \
+	bin/web_dlink_release.zip \
+	bin/web_nothreads_debug.zip \
+	bin/web_nothreads_release.zip \
+	bin/web_release.zip
 	
 
 elif [ "$platform" = "android" ]; then
