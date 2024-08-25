@@ -99,7 +99,7 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev
+          sudo apt-get install build-essential scons pkg-config libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev zip
           ./spine-godot/build/setup.sh $GODOT_TAG false $GODOT_MONO $GODOT_REPO
           ./spine-godot/build/build-v4.sh $GODOT_MONO
 

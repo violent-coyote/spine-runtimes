@@ -147,7 +147,7 @@ elif [ "$platform" = "web" ]; then
 	mv bin/godot.web.template_release.wasm32.zip bin/web_release.zip
 	mv bin/godot.web.template_debug.wasm32.zip bin/web_debug.zip
 
-	# nothreads	(firefox compatibility)
+	# nothreads	(best firefox compatibility)
 	scons platform=web production=yes tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
 	scons platform=web production=yes debug_symbols=yes tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
 	mv bin/godot.web.template_release.wasm32.nothreads.zip bin/web_nothreads_release.zip
@@ -166,19 +166,21 @@ elif [ "$platform" = "web" ]; then
 	mv bin/godot.web.template_debug.wasm32.nothreads.dlink.zip bin/web_dlink_nothreads_debug.zip
 
 	# package the binaries in one archive (`tpz`), includes version.txt
-	# default version = 4.3.stable, TODO: provide a version flag
-	echo "4.3.stable" > bin/version.txt
+	# (enables one-click in-editor web export install)
+	# default version=4.3.stable, TODO: provide a version flag
+	pushd bin
+	echo "4.3.stable" > version.txt
 
-	zip Godot_v4_export_templates_web.tpz bin/version.txt \
-	bin/web_debug.zip \
-	bin/web_dlink_debug.zip \
-	bin/web_dlink_nothreads_debug.zip \
-	bin/web_dlink_nothreads_release.zip \
-	bin/web_dlink_release.zip \
-	bin/web_nothreads_debug.zip \
-	bin/web_nothreads_release.zip \
-	bin/web_release.zip
-	
+	zip Godot_v4_export_templates_web.tpz version.txt \
+	web_debug.zip \
+	web_dlink_debug.zip \
+	web_dlink_nothreads_debug.zip \
+	web_dlink_nothreads_release.zip \
+	web_dlink_release.zip \
+	web_nothreads_debug.zip \
+	web_nothreads_release.zip \
+	web_release.zip
+	popd
 
 elif [ "$platform" = "android" ]; then
 	# --- ANROID ---
