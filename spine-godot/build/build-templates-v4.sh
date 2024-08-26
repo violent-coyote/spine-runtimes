@@ -56,6 +56,28 @@ else
 	cpus=$(grep -c ^processor /proc/cpuinfo)
 fi
 
+# get the engine version from the metadata in source repo's version.py file
+# 4.3 has nothreads as an option for web exports; 4.2 doesn't
+major=$(grep "^major = " ../godot/version.py | cut -d= -f2 | tr -d ' ')
+minor=$(grep "^minor = " ../godot/version.py | cut -d= -f2 | tr -d ' ')
+patch=$(grep "^patch = " ../godot/version.py | cut -d= -f2 | tr -d ' ')
+status=$(grep "^status = " ../godot/version.py | cut -d= -f2 | tr -d " '" | tr -d '"')
+
+# Initialize version string with major
+godot_version="$major"
+
+# Add minor
+godot_version="$version.$minor"
+
+# Add patch if it's not zero
+if [ "$patch" != "0" ]; then
+    godot_version="$version.$patch"
+fi
+
+# Add status
+godot_version="$version.$status"
+echo "Godot version identified from ../godot/version.py as v${godot_version}"
+
 pushd ../godot
 if [ "$platform" = "windows" ]; then
 	# --- Windows ---
@@ -140,38 +162,44 @@ elif [ "$platform" = "web" ]; then
 
 	# `production=yes` is an alias for `use_static_cpp=yes debug_symbols=no lto=auto`
 	# use `production=yes` with `debug_symbols=yes` to retain other optimizations but keep debug symbols
+	# lto=full requires more RAM than comes with standard github actions runner; compilation will crash at the linking stage.
+	# can also try lto=thin
+	# recommended cloud runner flags: use_static_cpp=yes lto=thin
 
 	# default (multithreaded)
-	scons platform=web production=yes tools=no target=template_release custom_modules="../spine_godot" --jobs=$cpus
-	scons platform=web production=yes debug_symbols=yes tools=no target=template_debug custom_modules="../spine_godot" --jobs=$cpus
+	scons platform=web use_static_cpp=yes lto=thin tools=no target=template_release custom_modules="../spine_godot" --jobs=$cpus
+	scons platform=web use_static_cpp=yes lto=thin debug_symbols=yes tools=no target=template_debug custom_modules="../spine_godot" --jobs=$cpus
 	mv bin/godot.web.template_release.wasm32.zip bin/web_release.zip
 	mv bin/godot.web.template_debug.wasm32.zip bin/web_debug.zip
 
-	# nothreads	(best firefox compatibility)
-	scons platform=web production=yes tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
-	scons platform=web production=yes debug_symbols=yes tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
-	mv bin/godot.web.template_release.wasm32.nothreads.zip bin/web_nothreads_release.zip
-	mv bin/godot.web.template_debug.wasm32.nothreads.zip bin/web_nothreads_debug.zip
-
 	# dlink (GDExtension support)
-	scons platform=web production=yes dlink_enabled=yes tools=no target=template_release custom_modules="../spine_godot" --jobs=$cpus
-	scons platform=web production=yes debug_symbols=yes dlink_enabled=yes tools=no target=template_debug custom_modules="../spine_godot" --jobs=$cpus
+	scons platform=web use_static_cpp=yes lto=thin dlink_enabled=yes tools=no target=template_release custom_modules="../spine_godot" --jobs=$cpus
+	scons platform=web use_static_cpp=yes lto=thin debug_symbols=yes dlink_enabled=yes tools=no target=template_debug custom_modules="../spine_godot" --jobs=$cpus
 	mv bin/godot.web.template_release.wasm32.dlink.zip bin/web_dlink_release.zip
 	mv bin/godot.web.template_debug.wasm32.dlink.zip bin/web_dlink_debug.zip
 
-	# dlink nothreads
-	scons platform=web production=yes dlink_enabled=yes tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
-	scons platform=web production=yes debug_symbols=yes dlink_enabled=yes tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
-	mv bin/godot.web.template_release.wasm32.nothreads.dlink.zip bin/web_dlink_nothreads_release.zip
-	mv bin/godot.web.template_debug.wasm32.nothreads.dlink.zip bin/web_dlink_nothreads_debug.zip
+	# Godot 4.3 and higher 
+	if [ "$minor" -ge 3 ]; then
+		# nothreads	(best firefox compatibility)
+		scons platform=web use_static_cpp=yes lto=thin tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
+		scons platform=web use_static_cpp=yes lto=thin debug_symbols=yes tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
+		mv bin/godot.web.template_release.wasm32.nothreads.zip bin/web_nothreads_release.zip
+		mv bin/godot.web.template_debug.wasm32.nothreads.zip bin/web_nothreads_debug.zip
+
+		# dlink nothreads
+		scons platform=web use_static_cpp=yes lto=thin dlink_enabled=yes tools=no target=template_release threads=no custom_modules="../spine_godot" --jobs=$cpus
+		scons platform=web use_static_cpp=yes lto=thin debug_symbols=yes dlink_enabled=yes tools=no target=template_debug threads=no custom_modules="../spine_godot" --jobs=$cpus
+		mv bin/godot.web.template_release.wasm32.nothreads.dlink.zip bin/web_dlink_nothreads_release.zip
+		mv bin/godot.web.template_debug.wasm32.nothreads.dlink.zip bin/web_dlink_nothreads_debug.zip
+	fi
 
 	# package the binaries in one archive (`tpz`), includes version.txt
 	# (enables one-click in-editor web export install)
 	# default version=4.3.stable, TODO: provide a version flag
 	pushd bin
-	echo "4.3.stable" > version.txt
+	echo $godot_version > version.txt
 
-	zip Godot_v4_export_templates_web.tpz version.txt \
+	zip "Godot_v${godot_version}_export_templates_web.tpz version.txt" \
 	web_debug.zip \
 	web_dlink_debug.zip \
 	web_dlink_nothreads_debug.zip \
