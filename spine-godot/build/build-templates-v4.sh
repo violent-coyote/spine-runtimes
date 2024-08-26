@@ -63,19 +63,16 @@ minor=$(grep "^minor = " ../godot/version.py | cut -d= -f2 | tr -d ' ')
 patch=$(grep "^patch = " ../godot/version.py | cut -d= -f2 | tr -d ' ')
 status=$(grep "^status = " ../godot/version.py | cut -d= -f2 | tr -d " '" | tr -d '"')
 
-# Initialize version string with major
-godot_version="$major"
-
-# Add minor
-godot_version="$version.$minor"
+# Initialize version string
+godot_version="$major.$minor"
 
 # Add patch if it's not zero
 if [ "$patch" != "0" ]; then
-    godot_version="$version.$patch"
+    godot_version="$godot_version.$patch"
 fi
 
 # Add status
-godot_version="$version.$status"
+godot_version="$godot_version.$status"
 echo "Godot version identified from ../godot/version.py as v${godot_version}"
 
 pushd ../godot
@@ -199,14 +196,15 @@ elif [ "$platform" = "web" ]; then
 	echo $godot_version > version.txt
 
 	# Create the tpz archive with version.txt
-    zip "Godot_v${godot_version}_export_templates_web.tpz" version.txt
+    tpz_name="Godot_v${godot_version}_export_templates_web.tpz"
+    zip "$tpz_name" version.txt
 
     # Add all zip files in the current directory to the tpz archive
-    for zip_file in *.zip; do
-        if [ -f "$zip_file" ]; then
-            zip -u "Godot_v${godot_version}_export_templates_web.tpz" "$zip_file"
-        fi
+    find . -maxdepth 1 -name "*.zip" -type f -print0 | while IFS= read -r -d '' zip_file; do
+        zip -u "$tpz_name" "$zip_file"
     done
+
+	popd
 
 elif [ "$platform" = "android" ]; then
 	# --- ANROID ---
