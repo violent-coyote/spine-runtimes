@@ -274,17 +274,11 @@ jobs:
           ./spine-godot/build/setup.sh $GODOT_TAG false false $GODOT_REPO
           ./spine-godot/build/build-templates-v4.sh web
 
-      - name: Upload artifacts debug
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-web-debug', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
-          path: spine-godot/godot/bin/web_debug.zip
-
-      - name: Upload artifacts release
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ format('{0}-{1}{2}.zip', 'godot-template-web-release', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
-          path: spine-godot/godot/bin/web_release.zip
+          name: ${{ format('{0}-{1}{2}.tpz', 'godot-templates-web-all', env.GODOT_TAG, env.GODOT_MONO_UPLOAD_SUFFIX) }}
+          path: spine-godot/godot/bin/Godot_v${{ env.GODOT_VERSION }}_export_templates_web.tpz
 
   # godot-template-ios:
   #   runs-on: macos-latest

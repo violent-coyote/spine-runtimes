@@ -195,20 +195,18 @@ elif [ "$platform" = "web" ]; then
 
 	# package the binaries in one archive (`tpz`), includes version.txt
 	# (enables one-click in-editor web export install)
-	# default version=4.3.stable, TODO: provide a version flag
 	pushd bin
 	echo $godot_version > version.txt
 
-	zip "Godot_v${godot_version}_export_templates_web.tpz version.txt" \
-	web_debug.zip \
-	web_dlink_debug.zip \
-	web_dlink_nothreads_debug.zip \
-	web_dlink_nothreads_release.zip \
-	web_dlink_release.zip \
-	web_nothreads_debug.zip \
-	web_nothreads_release.zip \
-	web_release.zip
-	popd
+	# Create the tpz archive with version.txt
+    zip "Godot_v${godot_version}_export_templates_web.tpz" version.txt
+
+    # Add all zip files in the current directory to the tpz archive
+    for zip_file in *.zip; do
+        if [ -f "$zip_file" ]; then
+            zip -u "Godot_v${godot_version}_export_templates_web.tpz" "$zip_file"
+        fi
+    done
 
 elif [ "$platform" = "android" ]; then
 	# --- ANROID ---
